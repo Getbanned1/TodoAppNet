@@ -321,7 +321,6 @@
     <None Include="protos\google\type\postal_address.proto" />
     <None Include="protos\google\type\quaternion.proto" />
     <None Include="protos\google\type\timeofday.proto" />
-    <None Include="todoapp-bb489-4c8135bf3abb.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

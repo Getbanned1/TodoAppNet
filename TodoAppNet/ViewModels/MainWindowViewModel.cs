@@ -50,7 +50,7 @@ namespace TodoAppNet
             CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
             // Инициализация Firestore с явным указанием пути к JSON ключу сервисного аккаунта
-            var credential = GoogleCredential.FromFile("C:\\Users\\epihi\\source\\repos\\TodoAppNet\\TodoAppNet\\todoapp-bb489-4c8135bf3abb.json");
+            var credential = GoogleCredential.FromFile("todoapp-bb489-4c8135bf3abb.json");
             var builder = new FirestoreClientBuilder { Credential = credential };
             _firestore = FirestoreDb.Create("todoapp-bb489", builder.Build());
 
