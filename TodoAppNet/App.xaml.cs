@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 
 namespace TodoAppNet
 {
-    /// <summary>
-    /// Логика взаимодействия для App.xaml
-    /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+                  //var authView = new AuthView();
+                  //authView.Show();
+
+            //    //// Закрытие приложения при закрытии окна авторизации
+            //    //authView.Closed += (s, args) => Current.Shutdown();
+        }
     }
 }

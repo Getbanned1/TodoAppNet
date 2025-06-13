@@ -81,7 +81,8 @@
             </Border>
 
             <!-- Детали задачи -->
-            <Border Grid.Column="1" Background="#FFF5F5F5" Visibility="{Binding SelectedTodo, Converter={StaticResource NullToVisibilityConverter}}">
+            <Border Grid.Column="1" Background="#FFF5F5F5"
+                    Visibility="{Binding SelectedTodo, Converter={StaticResource NullToVisibilityConverter}}">
                 <ScrollViewer Padding="20">
                     <StackPanel>
                         <TextBlock Text="Детали задачи" FontSize="16" FontWeight="Bold" Margin="0 0 0 15"/>
