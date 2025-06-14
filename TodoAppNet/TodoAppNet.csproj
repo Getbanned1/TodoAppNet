@@ -212,6 +212,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AddTagWindow.xaml.cs">
+      <DependentUpon>AddTagWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\ColorToBrushConverter.cs" />
     <Compile Include="FirebaseService.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Reminder.cs" />
@@ -224,6 +228,10 @@
     <Compile Include="FireBaseAuthProvider.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Page Include="AddTagWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AuthView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

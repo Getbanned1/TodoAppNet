@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Google.Cloud.Firestore;
-using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore.V1;
+using Google.Apis.Auth.OAuth2;
+
 namespace TodoAppNet
 {
     public class MainWindowViewModel : BaseViewModel
@@ -51,6 +52,7 @@ namespace TodoAppNet
         public RelayCommand LogoutCommand { get; }
         public RelayCommand AddTagCommand { get; }
         public RelayCommand RemoveTagCommand { get; }
+        public RelayCommand OpenAddTagWindowCommand { get; }
 
         public MainWindowViewModel(User currentUser)
         {
@@ -68,11 +70,48 @@ namespace TodoAppNet
             LogoutCommand = new RelayCommand(Logout);
             AddTagCommand = new RelayCommand(AddTagToSelectedTodo);
             RemoveTagCommand = new RelayCommand(RemoveTagFromSelectedTodo);
+            OpenAddTagWindowCommand = new RelayCommand(OpenAddTagWindow);
 
             // Загрузка данных
             _ = LoadInitialDataAsync();
         }
 
+        private void OpenAddTagWindow()
+        {
+            var addTagWindow = new AddTagWindow();
+            if (addTagWindow.ShowDialog() == true)
+            {
+                var newTag = new Tag
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = addTagWindow.TagName,
+                    Color = addTagWindow.TagColor
+                };
+
+                _ = AddTagToFirestoreAsync(newTag);
+            }
+        }
+
+        private async Task AddTagToFirestoreAsync(Tag tag)
+        {
+            try
+            {
+                var tagRef = _firestore.Collection("tags").Document(tag.Id);
+                await tagRef.SetAsync(new
+                {
+                    name = tag.Name,
+                    color = tag.Color
+                }, SetOptions.Overwrite);
+
+                AvailableTags.Add(tag);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка добавления тега: {ex.Message}");
+            }
+        }
+
+        
         private async Task LoadInitialDataAsync()
         {
             try
@@ -200,7 +239,8 @@ namespace TodoAppNet
             }
         }
 
-        private async Task SaveTodoAsync()
+
+            private async Task SaveTodoAsync()
         {
             if (SelectedTodo == null) return;
 
@@ -231,7 +271,8 @@ namespace TodoAppNet
                     { "isCompleted", todo.IsCompleted },
                     { "createdAt", todo.CreatedAt },
                     { "sortOrder", todo.SortOrder }
-                };            
+                };
+
                 if (string.IsNullOrEmpty(todo.Id))
                 {
                     var docRef = await tasksCollection.AddAsync(todoData);
@@ -308,7 +349,7 @@ namespace TodoAppNet
                 {
                     SelectedTodo.Tags.Add(tag);
 
-                    // Обновляем теги в Firestore
+                    
                     var userDoc = _firestore.Collection("users").Document(CurrentUser.Id);
                     var taskDoc = userDoc.Collection("tasks").Document(SelectedTodo.Id);
                     var tagDoc = taskDoc.Collection("tags").Document(tag.Id);
@@ -336,10 +377,7 @@ namespace TodoAppNet
             {
                 SelectedTodo.Tags.RemoveAll(t => t.Id == tag.Id);
 
-                // Удаляем тег из Firestore
                 var userDoc = _firestore.Collection("users").Document(CurrentUser.Id);
-
-               
                 var taskDoc = userDoc.Collection("tasks").Document(SelectedTodo.Id);
                 var tagDoc = taskDoc.Collection("tags").Document(tag.Id);
 
@@ -379,11 +417,9 @@ namespace TodoAppNet
         {
             try
             {
-                // Создаем новое окно авторизации
                 var authWindow = new AuthView();
                 authWindow.Show();
 
-                // Закрываем текущее окно
                 foreach (Window window in Application.Current.Windows)
                 {
                     if (window is MainWindow)
