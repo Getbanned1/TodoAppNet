@@ -4,27 +4,119 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TodoAppNet"
+        xmlns:converters="clr-namespace:TodoAppNet.Converters"
         mc:Ignorable="d"
-        Title="Todo App" Height="600" Width="900"
+        Title="TodoAppNet" Height="600" Width="900"
         WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- Конвертеры -->
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:CompletedDecorationConverter x:Key="CompletedDecorationConverter"/>
+        <converters:BooleanToVisibilityInverseConverter x:Key="BooleanToVisibilityInverseConverter"/>
+
+        <!-- Стиль для элементов списка -->
+        <Style TargetType="ListViewItem" x:Key="TaskListItemStyle">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="0 0 0 1"/>
+            <Setter Property="Padding" Value="10 5"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="Bd" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FFF5F5F5"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FFE3F2FD"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Шаблон для отображения задачи -->
+        <DataTemplate x:Key="TaskItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Grid.Column="0" 
+                          IsChecked="{Binding IsCompleted}" 
+                          VerticalAlignment="Center"
+                          Margin="0 0 10 0"/>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding Title}" 
+                               TextTrimming="CharacterEllipsis"
+                               TextDecorations="{Binding IsCompleted, 
+                                   Converter={StaticResource CompletedDecorationConverter}}"/>
+
+                    <WrapPanel Margin="0 5 0 0">
+                        <ItemsControl ItemsSource="{Binding Tags}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FFE0E0E0" 
+                                            CornerRadius="3"
+                                            Padding="5 2" 
+                                            Margin="0 0 5 0">
+                                        <TextBlock Text="{Binding Name}" 
+                                                   FontSize="11"
+                                                   Foreground="#FF424242"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </WrapPanel>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <!-- Ресурсы для тегов -->
+        <SolidColorBrush x:Key="TagBackgroundBrush" Color="#FFE0E0E0"/>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Шапка -->
+        <!-- Шапка приложения -->
         <Border Grid.Row="0" Background="#FF4285F4" Padding="10">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                <TextBlock Text="Todo App" FontSize="18" FontWeight="Bold" Foreground="White"
+                <TextBlock Text="TodoAppNet" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           Foreground="White"
                            VerticalAlignment="Center"/>
 
-                <TextBlock Text="{Binding CurrentUser.Username}" Margin="20 0 0 0"
-                           FontSize="16" Foreground="White" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding CurrentUser.Email}" 
+                           Margin="20 0 0 0"
+                           FontSize="16" 
+                           Foreground="White" 
+                           VerticalAlignment="Center"/>
 
-                <Button Content="Выйти" Margin="20 0 0 0" Padding="10 5"
+                <Button Content="Выйти" 
+                        Margin="20 0 0 0" 
+                        Padding="10 5"
                         Command="{Binding LogoutCommand}"
-                        Background="#FFEA4335" Foreground="White"
+                        Background="#FFEA4335" 
+                        Foreground="White"
                         HorizontalAlignment="Right"/>
             </StackPanel>
         </Border>
@@ -36,8 +128,10 @@
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Список задач -->
-            <Border Grid.Column="0" BorderBrush="#FFE0E0E0" BorderThickness="0 0 1 0">
+            <!-- Левая панель - список задач -->
+            <Border Grid.Column="0" 
+                    BorderBrush="#FFE0E0E0" 
+                    BorderThickness="0 0 1 0">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -45,64 +139,146 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="Мои задачи" FontSize="16" FontWeight="Bold" Margin="0 0 0 10"/>
+                    <TextBlock Text="Мои задачи" 
+                               FontSize="16" 
+                               FontWeight="Bold" 
+                               Margin="0 0 0 10"/>
 
-                    <ListView Grid.Row="1" ItemsSource="{Binding TodoItems}" 
+                    <!-- Список задач с поддержкой Drag-and-Drop -->
+                    <ListView x:Name="TasksListView"
+                              Grid.Row="1"
+                              ItemsSource="{Binding TodoItems}" 
                               SelectedItem="{Binding SelectedTodo}"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0 2">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted}" 
-                                              VerticalAlignment="Center"
-                                              Margin="0 0 5 0"/>
-
-                                    <TextBlock Grid.Column="1" Text="{Binding Title}" 
-                                               TextTrimming="CharacterEllipsis"
-                                               TextDecorations="{Binding IsCompleted, 
-                                                   Converter={StaticResource CompletedDecorationConverter}}"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
+                              ItemTemplate="{StaticResource TaskItemTemplate}"
+                              ItemContainerStyle="{StaticResource TaskListItemStyle}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              AllowDrop="True"
+                              PreviewMouseLeftButtonDown="ListView_PreviewMouseLeftButtonDown"
+                              Drop="ListView_Drop"
+                              DragOver="ListView_DragOver"
+                              DragEnter="ListView_DragEnter"
+                              DragLeave="ListView_DragLeave"
+                              MouseMove="ListView_MouseMove">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel AllowDrop="True"/>
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
                     </ListView>
 
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Добавить" Command="{Binding AddTodoCommand}"
-                                Background="#FF34A853" Foreground="White"/>
-                        <Button Content="Удалить" Command="{Binding DeleteTodoCommand}"
-                                Background="#FFEA4335" Foreground="White"/>
+                    <!-- Кнопки управления -->
+                    <StackPanel Grid.Row="2" 
+                                Orientation="Horizontal" 
+                                HorizontalAlignment="Right">
+                        <Button Content="Добавить" 
+                                Command="{Binding AddTodoCommand}"
+                                Background="#FF34A853" 
+                                Foreground="White"
+                                Margin="0 0 5 0"/>
+                        <Button Content="Удалить" 
+                                Command="{Binding DeleteTodoCommand}"
+                                Background="#FFEA4335" 
+                                Foreground="White"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Детали задачи -->
-            <Border Grid.Column="1" Background="#FFF5F5F5"
-                    Visibility="{Binding SelectedTodo, Converter={StaticResource NullToVisibilityConverter}}">
+            <!-- Правая панель - детали задачи -->
+            <Border Grid.Column="1" 
+                    Background="#FFF5F5F5"
+                    Visibility="{Binding SelectedTodo, 
+                                Converter={StaticResource NullToVisibilityConverter}}">
                 <ScrollViewer Padding="20">
                     <StackPanel>
-                        <TextBlock Text="Детали задачи" FontSize="16" FontWeight="Bold" Margin="0 0 0 15"/>
+                        <TextBlock Text="Детали задачи" 
+                                   FontSize="16" 
+                                   FontWeight="Bold" 
+                                   Margin="0 0 0 15"/>
 
                         <TextBlock Text="Название:" FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding SelectedTodo.Title, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Text="{Binding SelectedTodo.Title, 
+                                        UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0 0 0 10"/>
 
-                        <TextBlock Text="Описание:" Margin="0 15 0 0" FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding SelectedTodo.Description, UpdateSourceTrigger=PropertyChanged}" 
-                                 AcceptsReturn="True" Height="100" TextWrapping="Wrap"/>
+                        <TextBlock Text="Описание:" 
+                                   Margin="0 10 0 0" 
+                                   FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding SelectedTodo.Description, 
+                                        UpdateSourceTrigger=PropertyChanged}" 
+                                 AcceptsReturn="True" 
+                                 Height="100" 
+                                 TextWrapping="Wrap"
+                                 Margin="0 0 0 10"/>
 
-                        <TextBlock Text="Срок выполнения:" Margin="0 15 0 0" FontWeight="SemiBold"/>
-                        <DatePicker SelectedDate="{Binding SelectedTodo.DueDate}"/>
+                        <TextBlock Text="Срок выполнения:" 
+                                   Margin="0 10 0 0" 
+                                   FontWeight="SemiBold"/>
+                        <DatePicker SelectedDate="{Binding SelectedTodo.DueDate}"
+                                    Margin="0 0 0 10"/>
 
-                        <CheckBox Content="Выполнено" IsChecked="{Binding SelectedTodo.IsCompleted}"
-                                  Margin="0 15 0 0"/>
+                        <CheckBox Content="Выполнено" 
+                                  IsChecked="{Binding SelectedTodo.IsCompleted}"
+                                  Margin="0 10 0 15"/>
 
-                        <Button Content="Сохранить" Command="{Binding SaveTodoCommand}"
-                                HorizontalAlignment="Right" Width="100"
-                                Margin="0 20 0 0" Background="#FF4285F4" Foreground="White"/>
+                        <!-- Управление тегами -->
+                        <StackPanel>
+                            <TextBlock Text="Теги:" 
+                                       FontWeight="SemiBold"
+                                       Margin="0 0 0 5"/>
+
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox x:Name="TagsComboBox"
+                                          ItemsSource="{Binding AvailableTags}"
+                                          DisplayMemberPath="Name"
+                                          SelectedValuePath="Id"
+                                          Width="200"
+                                          Margin="0 0 5 0"/>
+                                <Button Content="Добавить тег"
+                                        Command="{Binding AddTagCommand}"
+                                        CommandParameter="{Binding SelectedItem, ElementName=TagsComboBox}"
+                                        Padding="10 3"/>
+                            </StackPanel>
+                            <ItemsControl ItemsSource="{Binding SelectedTodo.Tags}"
+                                          Margin="0 10 0 0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource TagBackgroundBrush}"
+                                                CornerRadius="3"
+                                                Padding="5 2"
+                                                Margin="0 0 5 5">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}"
+                                                           VerticalAlignment="Center"/>
+                                                <Button Content="×"
+                                                        Command="{Binding DataContext.RemoveTagCommand, 
+                                                                  RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="5 0 0 0"
+                                                        Padding="2 0"
+                                                        Background="Transparent"
+                                                        Foreground="Red"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <!-- Кнопка сохранения -->
+                        <Button Content="Сохранить" 
+                                Command="{Binding SaveTodoCommand}"
+                                HorizontalAlignment="Right" 
+                                Width="100"
+                                Margin="0 20 0 0"
+                                Background="#FF4285F4" 
+                                Foreground="White"/>
                     </StackPanel>
                 </ScrollViewer>
             </Border>

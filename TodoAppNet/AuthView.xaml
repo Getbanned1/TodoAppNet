@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TodoAppNet.AuthView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Todo App - Авторизация" 
+        Title="TodoApp - Авторизация" 
         Height="350" Width="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize">

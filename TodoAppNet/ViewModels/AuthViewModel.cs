@@ -9,7 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Google.Apis.Auth.OAuth2;
-using Google.Cloud.Firestore;
 using Grpc.Auth;
 using Grpc.Core;
 using System.IO;
