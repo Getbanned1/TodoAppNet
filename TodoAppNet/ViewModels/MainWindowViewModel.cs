@@ -51,13 +51,15 @@ namespace TodoAppNet
         public RelayCommand LogoutCommand { get; }
         public RelayCommand AddTagCommand { get; }
         public RelayCommand RemoveTagCommand { get; }
+        public RelayCommand OpenAddTagWindowCommand { get; }
+
 
         public MainWindowViewModel(User currentUser)
         {
             CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
             // Инициализация Firestore
-            var credential = GoogleCredential.FromFile("todoapp-bb489-4c8135bf3abb.json");
+            var credential = GoogleCredential.FromFile("Keys\\todoapp-bb489-4581398b9af9.json");
             var builder = new FirestoreClientBuilder { Credential = credential };
             _firestore = FirestoreDb.Create("todoapp-bb489", builder.Build());
 
@@ -68,11 +70,51 @@ namespace TodoAppNet
             LogoutCommand = new RelayCommand(Logout);
             AddTagCommand = new RelayCommand(AddTagToSelectedTodo);
             RemoveTagCommand = new RelayCommand(RemoveTagFromSelectedTodo);
+            OpenAddTagWindowCommand = new RelayCommand(OpenAddTagWindow);
 
             // Загрузка данных
             _ = LoadInitialDataAsync();
         }
+        private async void OpenAddTagWindow()
+{
+            AddTagWindow addTagWindow = new AddTagWindow();
+            if (addTagWindow.ShowDialog() == true)
+            {
+                var newTag = new Tag
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = addTagWindow.TagName,
+                    Color = addTagWindow.TagColor
+                };
 
+                await AddTagToFirestoreAsync(newTag);
+
+                // Добавляем новый тег в коллекцию, чтобы UI обновился
+                //if (AvailableTags == null)
+                //    AvailableTags = new ObservableCollection<Tag>();
+
+                AvailableTags.Add(newTag);
+            }
+        }
+
+private async Task AddTagToFirestoreAsync(Tag tag)
+{
+    try
+    {
+        var tagRef = _firestore.Collection("tags").Document(tag.Id);
+        await tagRef.SetAsync(new
+        {
+            name = tag.Name,
+            color = tag.Color
+        }, SetOptions.Overwrite);
+
+        AvailableTags.Add(tag);
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Ошибка добавления тега: {ex.Message}");
+    }
+}
         private async Task LoadInitialDataAsync()
         {
             try

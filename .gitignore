@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /TodoAppNet/todoapp-bb489-4c8135bf3abb.json
+Keys/
+TodoAppNet/Keys/

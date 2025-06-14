@@ -48,11 +48,11 @@ namespace TodoAppNet
 
             modelBuilder.Entity<Tag>()
                 .HasKey(t => t.Id);
-            modelBuilder.Entity<Tag>()
-                .HasOne(t => t.User)
-                .WithMany(u => u.Tags)
-                .HasForeignKey(t => t.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<Tag>()
+            //    .HasOne(t => t.User)
+            //    .WithMany(u => u.Tags)
+            //    .HasForeignKey(t => t.UserId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TaskItem>()
                 .HasKey(t => t.Id);
@@ -74,11 +74,11 @@ namespace TodoAppNet
                 .WithMany(t => t.TaskTags)
                 .HasForeignKey(tt => tt.TaskId)
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<TaskTag>()
-                .HasOne(tt => tt.Tag)
-                .WithMany(t => t.TaskTags)
-                .HasForeignKey(tt => tt.TagId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<TaskTag>()
+            //    .HasOne(tt => tt.Tag)
+            //    .WithMany(t => t.TaskTags)
+            //    .HasForeignKey(tt => tt.TagId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Reminder>()
                 .HasKey(r => r.Id);

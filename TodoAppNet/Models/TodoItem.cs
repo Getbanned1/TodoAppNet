@@ -30,9 +30,6 @@ namespace TodoAppNet
 
         [FirestoreProperty("tagIds")]
         public List<string> TagIds { get; set; } = new List<string>();
-
-        // Не сохраняемые в Firestore свойства
-        [FirestoreProperty(ConverterType = typeof(FirestoreEnumerableConverter<Tag>))]
         public List<Tag> Tags { get; set; } = new List<Tag>();
 
         // Методы для работы с тегами
@@ -60,23 +57,5 @@ namespace TodoAppNet
         public bool HasTag(string tagId) => TagIds.Contains(tagId);
 
         public override string ToString() => Title;
-    }
-
-    public class FirestoreEnumerableConverter<T> : IFirestoreConverter<IEnumerable<T>>
-    {
-        public object ToFirestore(IEnumerable<T> value)
-        {
-            // Преобразуем IEnumerable<T> в список для Firestore
-            return new List<T>(value);
-        }
-
-        public IEnumerable<T> FromFirestore(object value)
-        {
-            // Преобразуем данные из Firestore обратно в IEnumerable<T>
-            if (value is List<T> list)
-                return list;
-
-            return new List<T>();
-        }
     }
 }

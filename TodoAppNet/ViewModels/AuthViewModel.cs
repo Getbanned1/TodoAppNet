@@ -51,7 +51,7 @@ namespace TodoAppNet
             _currentWindow = window;
 
             // Явное создание Firestore с учетными данными из JSON файла
-            var credential = GoogleCredential.FromFile("todoapp-bb489-4c8135bf3abb.json");
+            var credential = GoogleCredential.FromFile("Keys\\todoapp-bb489-4581398b9af9.json");
             var builder = new FirestoreClientBuilder { Credential = credential };
             _firestore = FirestoreDb.Create("todoapp-bb489", builder.Build());
 

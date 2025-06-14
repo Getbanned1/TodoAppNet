@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using Google.Cloud.Firestore;
 
+[FirestoreData]
 public class Tag
 {
+    [FirestoreDocumentId]
     public string Id { get; set; }
-    public string UserId { get; set; }
-    public string Name { get; set; }
-    public string Color { get; set; }
 
-    public User User { get; set; }
-    public ICollection<TaskTag> TaskTags { get; set; }
+    [FirestoreProperty("name")]
+    public string Name { get; set; }
+
+    [FirestoreProperty("color")]
+    public string Color { get; set; }
 }
